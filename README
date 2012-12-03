@@ -1,0 +1,47 @@
+gpt-print: Dump GPT partition tables
+====================================
+
+Usage: gpt-print.rb DEVICE
+
+Where DEVICE is a full drive, like /dev/sda on Linux or /dev/disk0 on Mac OS X.
+
+This will print all useful data about your partition table, eg:
+
+- index: 1
+  type: C12A7328-F81F-11D2-BA4B-00A0C93EC93B
+  uuid: 0B4DB736-5742-4CEB-966A-48A88A354CE6
+  start: 40
+  size: 409600
+  name: EFI System Partition
+- index: 2
+  type: 48465300-0000-11AA-AA11-00306543ECAC
+  uuid: 5FB3ABA9-CC56-4B48-8A43-3E8A657C25BC
+  start: 409640
+  size: 625683584
+  name: Macintosh HD
+- index: 3
+  type: 426F6F74-0000-11AA-AA11-00306543ECAC
+  uuid: 4B0387BC-ED75-572C-8BD3-653A2BEE7913
+  start: 626355368
+  size: 1270616
+  name: Recovery HD
+- index: 4
+  type: EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
+  uuid: 47A8AEA0-7BB4-4FED-8A4C-90B9AE8F7D28
+  start: 627625984
+  size: 2097152
+  name: Shared
+- index: 5
+  type: EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
+  uuid: 9BF0F6A1-3C30-4277-A9B3-8D6097F9E89D
+  start: 629723136
+  size: 251904000
+  name: Boot Camp
+
+The data printed is useful if something ever goes wrong with your partitioning, you'll at least know where to look for the start and end of partitions. It can also guide you in restoring the exact partitions you once had.
+
+This script will only work on GPT drives, if your drive is in another format it is unlikely to do anything useful!
+
+
+(C) 2008 Dave Vasilevsky <dave@vasilevsky.ca>
+Licensing: Simplified BSD License, see LICENSE file
