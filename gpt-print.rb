@@ -30,14 +30,30 @@ class GUID
 	end
 end
 
-class GPTEntry < Struct.new(:entries, :index) # index is one-based
+class GPTHeader
 	BlockSize = 512
-	EntryLBA = 2
-	EntryCount = 128
-	EntrySize = 128
+	Magic = "EFI PART"
+	Version = "\x00\x00\x01\x00"
 	
+	attr_reader :entryCount, :entrySize, :entryLBA
+	
+	def initialize(device)
+		@data = IO.read(device, BlockSize, BlockSize)
+		@magic = @data[0, Magic.size]
+		raise 'Not a GPT partition!' if @magic != Magic
+		@version = @data[8, 4]
+		raise 'Bad GPT version' if @version != Version
+		
+		@entryLBA = @data[72, 8].unpack('Q<')[0]
+		raise 'Weird LBA' if @entryLBA != 2
+		@entryCount = @data[80, 4].unpack('L<')[0]
+		@entrySize = @data[84, 4].unpack('L<')[0]
+	end
+end
+
+class GPTEntry < Struct.new(:entries, :index, :e_size) # index is one-based
 	def offset
-		EntrySize * (index - 1)
+		e_size * (index - 1)
 	end
 	
 	def type
@@ -49,11 +65,11 @@ class GPTEntry < Struct.new(:entries, :index) # index is one-based
 	end
 	
 	def start
-		entries[offset + 0x20, 8].unpack('Q')[0]
+		entries[offset + 0x20, 8].unpack('Q<')[0]
 	end
 	
 	def finish
-		entries[offset + 0x28, 8].unpack('Q')[0]
+		entries[offset + 0x28, 8].unpack('Q<')[0]
 	end
 	
 	def size
@@ -81,9 +97,10 @@ class GPTEntry < Struct.new(:entries, :index) # index is one-based
 	end
 	
 	def self.entries(device)
-		data = IO.read(device, EntryCount * EntrySize,
-			EntryLBA * BlockSize)
-		(1..EntryCount).map { |i| new(data, i) }
+		hdr = GPTHeader.new(device)
+		data = IO.read(device, hdr.entryCount * hdr.entrySize,
+			hdr.entryLBA * GPTHeader::BlockSize)
+		(1..hdr.entryCount).map { |i| new(data, i, hdr.entrySize) }
 	end
 	
 	def self.print(device)
