@@ -111,5 +111,5 @@ class GPTEntry < Struct.new(:entries, :index, :e_size) # index is one-based
 	end
 end
 
-device = ARGV.shift
+device = ARGV.shift or raise 'Device argument is required'
 GPTEntry.print(device)
