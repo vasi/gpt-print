@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
 # (C) 2008 Dave Vasilevsky <dave@vasilevsky.ca>
 # Licensing: Simplified BSD License, see LICENSE file
-require 'iconv'
 require 'yaml'
 
 # Globally unique ID
@@ -77,7 +76,8 @@ class GPTEntry < Struct.new(:entries, :index, :e_size) # index is one-based
 	end
 	
 	def name
-		Iconv.conv('UTF-8', 'UTF-16LE', entries[offset + 0x38, 72]).
+		entries[offset + 0x38, 72].force_encoding('UTF-16LE').
+			encode('UTF-8').
 			unpack('Z*')[0] # remove trailing nulls
 	end
 		
